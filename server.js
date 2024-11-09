@@ -3,6 +3,7 @@ const helmet = require('helmet'); // Para permitir requisições de diferentes o
 const cors = require('cors'); // Para permitir requisições de diferentes origens, se necessário
 const dotenv = require('dotenv');
 const authRoutes = require('./src/routes/authRoutes'); // Rota de autenticação
+const userRoutes = require('./src/routes/userRoutes'); // Rota de autenticação
 
 dotenv.config(); // Carrega as variáveis de ambiente do arquivo .env
 
@@ -18,6 +19,7 @@ app.use(helmet());
 
 // Usar as rotas de autenticação
 app.use('/', authRoutes);
+app.use('/', userRoutes);
 
 // Caso precise de uma rota para testar se o servidor está funcionando
 app.get('/', (req, res) => {
