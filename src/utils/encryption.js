@@ -32,7 +32,7 @@ const decryptPassword = (encryptedPassword) => {
     const encryptedText = parts[1];
     const secretKey = process.env.SECRET_KEY_CRYPTO;
 
-    if (!secretKey || secretKey.length !== 64) {
+    if (!secretKey || secretKey.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(secretKey)) {
         throw new Error('A chave secreta deve estar definida e ter 64 caracteres hexadecimais.');
     }
 
@@ -44,7 +44,7 @@ const decryptPassword = (encryptedPassword) => {
 
 const generateToken = (user) => {
     const secret = process.env.JWT_SECRET;
-    const expiresIn = process.env.JWT_EXPIRES_IN; // Tempo de expiração do token, ajuste conforme necessário
+    const expiresIn = process.env.JWT_EXPIRES_IN; 
     return jwt.sign({ id: user.id, username: user.username }, secret, { expiresIn });
 }
 
@@ -61,6 +61,7 @@ const verifyToken = (token) => {
     });
 }
 
+// Essa função valida se o token é ainda válido pelas próximas 7 horas
 const checkAndRefreshToken = async (currentToken, user) => {
     try {
         const decoded = await verifyToken(currentToken);
