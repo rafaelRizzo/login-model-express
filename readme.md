@@ -43,7 +43,7 @@ Substitua as variáveis pelos valores corretos:
     port_mysql: A porta onde o MySQL está rodando (geralmente 3306).
     nome_da_database: O nome do banco de dados a ser utilizado.
 
-4. Configuração do Prisma ORM
+### 4. Configuração do Prisma ORM
 
     Gerar o Cliente Prisma: Após definir os modelos no arquivo prisma/schema.prisma, rode o seguinte comando para gerar o Prisma Client:
 
@@ -58,7 +58,7 @@ Esse comando faz o seguinte:
     Gera os scripts de migração com base nos modelos definidos no schema.prisma.
     Aplica as migrações no banco de dados MySQL.
 
-5. Variáveis de Ambiente
+### 5. Variáveis de Ambiente
 
 Configure as variáveis de ambiente no arquivo .env:
 
@@ -76,7 +76,8 @@ DATABASE_URL="mysql://usuario_mysql:senha_mysql@host_mysql:port_mysql/nome_da_da
     DATABASE_URL: URL de conexão com o banco de dados MySQL.
 
 Nota: Certifique-se de não deixar a chave SECRET_KEY_CRYPTO vazia. Ela deve ser uma chave aleatória de 64 caracteres para garantir a segurança na criptografia das senhas.
-6. Rodando a Aplicação
+
+### 6. Rodando a Aplicação
 
 Para rodar a aplicação localmente, use o seguinte comando:
 
