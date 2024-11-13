@@ -74,11 +74,11 @@ class UserController {
                 return res.status(400).json({ error: parseResult.error.errors[0].message });
             }
 
-            const { username } = req.body;
+            const { username, status } = req.body; // Agora recebemos o status do corpo da requisição
             const userId = req.params.id;
 
-            // Tenta atualizar o usuário
-            await UserModel.updateUser(userId, username);
+            // Tenta atualizar o usuário com o novo username e status
+            await UserModel.updateUser(userId, username, status);
 
             res.status(200).json({ message: 'Usuário atualizado com sucesso' });
         } catch (error) {
