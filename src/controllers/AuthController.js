@@ -1,19 +1,13 @@
-const { z } = require('zod'); // Importando o Zod
-const UserModel = require('../models/UserModel'); // Classe para manipular os usuário
-const { decryptPassword, generateToken, checkAndRefreshToken } = require('../utils/encryption'); // Funções utilitárias
-
-// Definindo o esquema de validação com Zod
-const loginSchema = z.object({
-    username: z.string().min(1, 'O nome de usuário é obrigatório'), // Validação para username
-    password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres') // Validação para senha
-});
+const UserModel = require('../models/UserModel'); // Classe para manipular os usuários
+const { generateToken, checkAndRefreshToken, decryptPassword } = require('../utils/encryption'); // Funções utilitárias
+const { loginSchema } = require("../schemas/auth");
 
 class AuthController {
+    // Login do usuário
     async login(req, res) {
         try {
             // Validando o corpo da requisição com Zod
             const parseResult = loginSchema.safeParse(req.body);
-
             if (!parseResult.success) {
                 return res.status(400).json({ error: parseResult.error.errors[0].message });
             }
@@ -38,7 +32,7 @@ class AuthController {
                 await UserModel.updateToken(user.id, token);
             }
 
-            console.log("Usuário logado com sucesso!")
+            console.log("Usuário logado com sucesso!");
             res.status(200).json({
                 user: {
                     id: user.id,
