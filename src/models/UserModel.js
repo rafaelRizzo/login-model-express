@@ -1,65 +1,109 @@
-const db = require('../config/db'); // Importando o db para poder manipular o banco
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-// Classe para manipular o usuário no banco de dados
 class UserModel {
     // Busca um usuário pelo nome de usuário
     async findByUsername(username) {
-        const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
-        return rows[0] || null;
+        try {
+            const user = await prisma.users.findUnique({
+                where: { username },
+            });
+            return user || null;
+        } catch (error) {
+            throw new Error('Erro ao buscar o usuário');
+        }
     }
 
     // Cria um novo usuário se não houver duplicação do username
     async createUser(username, password) {
-        const existingUser = await this.findByUsername(username); // Verifica se o usuário já existe
+        try {
+            const existingUser = await this.findByUsername(username);
 
-        if (existingUser) {
-            throw new Error('Username já em uso');
+            if (existingUser) {
+                throw new Error('Username já em uso');
+            }
+
+            const newUser = await prisma.users.create({
+                data: {
+                    username,
+                    password,
+                },
+            });
+            return newUser.id; // Retorna o ID do usuário recém-criado
+        } catch (error) {
+            throw new Error('Erro ao criar o usuário');
         }
-
-        const [result] = await db.query(
-            'INSERT INTO users (username, password) VALUES (?, ?)',
-            [username, password]
-        );
-        return result.insertId; // Retorna o ID do usuário recém-criado
     }
 
     // Busca um usuário pelo ID
     async findById(userId) {
-        const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
-        if (rows[0]) {
-            return rows[0];
-        } else {
-            throw new Error('Usuário não encontrado');
+        try {
+            const user = await prisma.users.findUnique({
+                where: { id: Number(userId) }, // Converte o ID para número
+            });
+
+            if (!user) {
+                throw new Error('Usuário não encontrado');
+            }
+            return user;
+        } catch (error) {
+            throw new Error('Erro ao buscar o usuário');
         }
     }
 
     // Atualiza dados de um usuário pelo ID
     async updateUser(userId, username) {
+        try {
+            const existingUser = await prisma.users.findFirst({
+                where: {
+                    username,
+                    NOT: { id: Number(userId) }, // Converte o ID para número
+                },
+            });
 
-        // Verifica se já existe outro usuário com o novo username, mas não o próprio usuário
-        const [rows] = await db.query(
-            'SELECT * FROM users WHERE username = ? AND id != ?',
-            [username, userId]
-        );
+            if (existingUser) {
+                throw new Error('Username já em uso');
+            }
 
-        // Se o array `rows` não estiver vazio, significa que o username já está em uso por outro usuário
-        if (rows.length > 0) {
-            console.log("Username já em uso.")
-            throw new Error('Username já em uso');
+            await prisma.users.update({
+                where: { id: Number(userId) },
+                data: { username },
+            });
+        } catch (error) {
+            if (error.message.includes('Record to update does not exist')) {
+                throw new Error('Usuário não encontrado para atualização');
+            }
+            throw new Error('Erro ao atualizar o usuário');
         }
-
-        // Se o username não existir, atualiza o usuário com o novo username
-        await db.query('UPDATE users SET username = ? WHERE id = ?', [username, userId]);
     }
 
     // Exclui um usuário pelo ID
     async deleteUser(userId) {
-        await db.query('DELETE FROM users WHERE id = ? LIMIT 1', [userId]);
+        try {
+            const user = await prisma.users.delete({
+                where: { id: Number(userId) },
+            });
+            return user; // Retorna o usuário excluído
+        } catch (error) {
+            console.log(error)
+
+            if (error.message.includes('Record to delete does not exist')) {
+                throw new Error('Usuário não encontrado para exclusão');
+            }
+            throw new Error('Erro ao tentar excluir o usuário');
+        }
     }
 
     // Função para atualizar o token no banco de dados
     async updateToken(userId, token) {
-        await db.query('UPDATE users SET token = ? WHERE id = ? LIMIT 1', [token, userId]);
+        try {
+            await prisma.users.update({
+                where: { id: Number(userId) },
+                data: { token },
+            });
+        } catch (error) {
+            throw new Error('Erro ao tentar atualizar o token');
+        }
     }
 }
 
